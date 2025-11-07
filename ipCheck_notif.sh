@@ -1,21 +1,18 @@
-#!/bin/bash
+#!/bin/zsh
+CACHE_FILE=~/bin/.ip_cache
+CURRENT_IP=$(curl -Ls ipconfig.me)
 
-# if the output of:
-# curl -L ipconfig.me (returns one's external IP address)
-# is NOT    
-# 73.110.199.169%
-# do something notificationy
-
-PATH=$PATH:/Users/tonyadams/.rvm/gems/ruby-2.6.3/bin
-
-lastKnownIP="73.110.199.169x"
-output=$(curl -Ls ipconfig.me)
-
-message="iPCheck finds a new external IP: ${output}"
-title="NEW EXTERNAL IP ADDRESS!"
-if  [ "$lastKnownIP" != "$output" ]; then
-    (/Users/tonyadams/.rvm/gems/ruby-2.6.3/bin/terminal-notifier -message "$message" -title "$title")
-   # echo "iPCheck finds a new external IP: ${output}."
+if [[ -f $CACHE_FILE ]]; then
+  LAST_IP=$(cat $CACHE_FILE)
+else
+  LAST_IP=""
 fi
 
+if [[ "$LAST_IP" != "$CURRENT_IP" ]]; then
+  # Native macOS notification
+  terminal-notifier -message "New IP: $CURRENT_IP" -title "IP Changed" -sound default
+  # does not work - could be my weird terminal or something
+  # osascript -e "display notification \"New IP: $CURRENT_IP\" with title \"IP Changed\""
+  echo "$CURRENT_IP" > $CACHE_FILE
+fi
 
